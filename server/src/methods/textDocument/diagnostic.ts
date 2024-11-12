@@ -50,7 +50,7 @@ export const diagnostic = (
   const invalidWordsAndSuggestions: Record<string, string[]> =
     spellingSuggestions(content);
 
-  log.write({ spellingSuggestions: invalidWordsAndSuggestions });
+  // log.write({ spellingSuggestions: invalidWordsAndSuggestions });
 
   const items: Diagnostic[] = [];
 

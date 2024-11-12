@@ -39,10 +39,10 @@ const methodLookup: Record<string, RequestMethod | NotificationMethod> = {
   shutdown,
   "textDocument/completion": completion,
   "textDocument/didChange": didChange,
-  "textDocument/didOpen": didOpen,
+  // "textDocument/didOpen": didOpen,
   "textDocument/diagnostic": diagnostic,
-  "textDocument/codeAction": codeAction,
-  "textDocument/hover": hover,
+  // "textDocument/codeAction": codeAction,
+  // "textDocument/hover": hover,
 };
 
 const respond = (id: RequestMessage["id"], result: object | null) => {
@@ -50,7 +50,7 @@ const respond = (id: RequestMessage["id"], result: object | null) => {
   const messageLength = Buffer.byteLength(message, "utf-8");
   const header = `Content-Length: ${messageLength}\r\n\r\n`;
 
-  log.write(header + message);
+  // log.write(header + message);
   process.stdout.write(header + message);
 };
 
@@ -72,7 +72,7 @@ process.stdin.on("data", (chunk) => {
     const rawMessage = buffer.slice(messageStart, messageStart + contentLength);
     const message = JSON.parse(rawMessage);
 
-    log.write({ id: message.id, method: message.method });
+    // log.write({ id: message.id, method: message.method });
 
     const method = methodLookup[message.method];
 

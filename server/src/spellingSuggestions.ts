@@ -23,7 +23,7 @@ export const spellingSuggestions = (
     .stdout.trim()
     .split("\n");
 
-  log.write({ allOutput });
+  // log.write({ allOutput });
 
   allOutput.forEach((line) => {
     const prefix = line.slice(0, 1);
@@ -35,7 +35,7 @@ export const spellingSuggestions = (
         const suggestionMatch = line.match(/^& (.*?) \d.*: (.*)$/);
 
         if (!suggestionMatch) {
-          log.write({ spellingSuggestions: { invalidMatch: line } });
+          // log.write({ spellingSuggestions: { invalidMatch: line } });
           return;
         }
 
@@ -48,7 +48,7 @@ export const spellingSuggestions = (
         const match = line.match(/^# (.*?) \d/);
 
         if (!match) {
-          log.write({ spellingSuggestions: { invalidMatch: line } });
+          // log.write({ spellingSuggestions: { invalidMatch: line } });
           return;
         }
 
