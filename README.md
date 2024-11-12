@@ -1,9 +1,19 @@
-A simple language server to walk-through learning the LSP
+# Language Server Protocol (LSP) Server
 
-Based on https://github.com/semanticart/minimum-viable-vscode-language-server-extension
+This repository contains an LSP (Language Server Protocol) server designed for development and debugging purposes. The server provides language-specific features, such as autocomplete, error checking, and other IDE functionalities.
 
-[Watch the YouTube video where the first version of this code was written<BR>![youtube thumbnail](./assets/thumbnail.jpg)](https://youtu.be/Xo5VXTRoL6Q)
+## Getting Started
 
-[Part 2<BR>![youtube thumbnail](./assets/thumbnail2.jpg)](https://www.youtube.com/watch?v=t1nI8i-D4oM)
+### Prerequisites
 
-[Part 3<BR>![youtube thumbnail](./assets/thumbnail3.jpg)](https://www.youtube.com/watch?v=yF2XDhjUt8U)
+- [Node.js](https://nodejs.org) (version 14 or above)
+- [npm](https://www.npmjs.com/) (usually comes with Node.js)
+
+### Installation
+
+1. Clone this repository:
+
+   ```bash
+   git clone https://github.com/nileshkk9/lsp-extension.git
+   cd lsp-extension
+   npm install
