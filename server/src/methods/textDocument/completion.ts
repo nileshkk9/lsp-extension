@@ -1,16 +1,17 @@
 import { RequestMessage } from '../../server';
 import { documents, TextDocumentIdentifier } from '../../documents';
 import log from '../../log';
-import * as fs from 'fs';
+// import * as fs from 'fs';
 import { Position } from '../../types';
-import path from 'path';
+// import path from 'path';
 import { InsertTextFormat } from 'vscode-languageserver';
+import { workflowCompletionsStructure } from '../constants/workflowCompletionsStructure';
 
 const MAX_LENGTH = 1000;
 
 // Load JSON data from an asset file
-const jsonFilePath = path.join(__dirname, '../../../assets/completions.json');
-const jsonData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
+// const jsonFilePath = path.join(__dirname, '../../../assets/completions.json');
+// const jsonData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
 
 type CompletionItem = {
   label: string;
@@ -41,16 +42,16 @@ export const completion = (message: RequestMessage): CompletionList | null => {
   const currentPrefix = lineUntilCursor.replace(/.*[\W ](.*?)/, '$1');
 
   // Generate completion items from JSON data
-  const items: CompletionItem[] = Object.entries(jsonData)
+  const items: CompletionItem[] = Object.entries(workflowCompletionsStructure)
     .map(([key, nodeObject]: any) => {
       const nodeType = nodeObject.nodeType || key;
 
       // Beautify the JSON output for insertText with indentation
-      const beautifiedJson = JSON.stringify(
+      const beautifiedJson = `"${key}": ${JSON.stringify(
         nodeObject,
         null,
         2
-      ).replace(/\n/g, '\n');
+      ).replace(/\n/g, '\n')}`;
 
       return {
         label: nodeType,
@@ -60,7 +61,9 @@ export const completion = (message: RequestMessage): CompletionList | null => {
         insertTextFormat: InsertTextFormat.Snippet // Use snippet format for multiline
       };
     })
-    .filter((item) => item.label.toLowerCase().startsWith(currentPrefix.toLowerCase()))
+    .filter((item) =>
+      item.label.toLowerCase().startsWith(currentPrefix.toLowerCase())
+    )
     .slice(0, MAX_LENGTH);
 
   return {

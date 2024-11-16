@@ -39,9 +39,9 @@ const methodLookup: Record<string, RequestMethod | NotificationMethod> = {
   shutdown,
   "textDocument/completion": completion,
   "textDocument/didChange": didChange,
-  // "textDocument/didOpen": didOpen,
+  "textDocument/didOpen": didOpen,
   "textDocument/diagnostic": diagnostic,
-  // "textDocument/codeAction": codeAction,
+  "textDocument/codeAction": codeAction,
   // "textDocument/hover": hover,
 };
 

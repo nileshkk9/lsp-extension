@@ -1,5 +1,5 @@
 import { spawnSync } from "child_process";
-import log from "./log";
+import log from "../../log";
 
 export const spellingSuggestions = (
   content: string

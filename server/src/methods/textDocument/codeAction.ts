@@ -1,7 +1,7 @@
-import { DocumentUri, TextDocumentIdentifier } from "../../documents";
-import { RequestMessage } from "../../server";
-import { Range } from "../../types";
-import { Diagnostic, diagnostic } from "./diagnostic";
+import { DocumentUri, TextDocumentIdentifier } from '../../documents';
+import { RequestMessage } from '../../server';
+import { Range } from '../../types';
+import { Diagnostic, diagnostic } from './diagnostic';
 
 interface CodeActionContext {
   diagnostics: Diagnostic[];
@@ -24,7 +24,7 @@ interface WorkspaceEdit {
 
 interface CodeAction {
   title: string;
-  kind: "quickfix";
+  kind: 'quickfix';
   edit: WorkspaceEdit;
   data?: unknown;
 }
@@ -34,20 +34,20 @@ export const codeAction = (message: RequestMessage): CodeAction[] | null => {
   const diagnostics = params.context.diagnostics;
 
   return diagnostics.flatMap((diagnostic): CodeAction[] => {
-    return diagnostic.data.wordSuggestions.map((wordSuggestion): CodeAction => {
+    return diagnostic.data?.keySuggestion.map((keySuggestion): CodeAction => {
       const codeAction: CodeAction = {
-        title: `Replace with ${wordSuggestion}`,
-        kind: "quickfix",
+        title: `Replace with ${keySuggestion}`,
+        kind: 'quickfix',
         edit: {
           changes: {
             [params.textDocument.uri]: [
               {
                 range: diagnostic.range,
-                newText: wordSuggestion,
-              },
-            ],
-          },
-        },
+                newText: keySuggestion
+              }
+            ]
+          }
+        }
       };
       return codeAction;
     });
