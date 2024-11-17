@@ -42,7 +42,7 @@ const methodLookup: Record<string, RequestMethod | NotificationMethod> = {
   "textDocument/didOpen": didOpen,
   "textDocument/diagnostic": diagnostic,
   "textDocument/codeAction": codeAction,
-  // "textDocument/hover": hover,
+  "textDocument/hover": hover,
 };
 
 const respond = (id: RequestMessage["id"], result: object | null) => {

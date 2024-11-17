@@ -1,12 +1,8 @@
 import { RequestMessage } from '../../server';
 import { Range } from '../../types';
-
 import log from '../../log';
-
 import { TextDocumentIdentifier, documents } from '../../documents';
-// import { spellingSuggestions } from '../../spellingSuggestions';
 import { workflowReferenceStructure } from '../constants/workflowReferenceStructure';
-// import { suggestClosestKeys } from '../utils/lavenshtein';
 import { keySuggestions } from '../suggestions/keySuggestions';
 
 interface DocumentDiagnosticParams {

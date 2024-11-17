@@ -1,7 +1,8 @@
-import { spawnSync } from "child_process";
-import { DocumentUri, documents, wordUnderCursor } from "../../documents";
-import { RequestMessage } from "../../server";
-import { Position, Range } from "../../types";
+import { DocumentUri, documents, wordUnderCursor } from '../../documents';
+import { RequestMessage } from '../../server';
+import { Position, Range } from '../../types';
+import { workflowHoverDefinition } from '../constants/workflowHoverDefinition';
+import { formatHoverContent, removeQuotes } from '../utils/helper';
 
 type HoverParams = {
   textDocument: { uri: DocumentUri };
@@ -10,7 +11,7 @@ type HoverParams = {
 
 type Hover = {
   contents: {
-    kind: "markdown";
+    kind: 'markdown';
     value: string;
   };
   range: Range;
@@ -19,32 +20,34 @@ type Hover = {
 export const hover = (message: RequestMessage): Hover | null => {
   const params = message.params as HoverParams;
 
+  // Extract the current word under the cursor
   const currentWord = wordUnderCursor(params.textDocument.uri, params.position);
 
   if (!currentWord) {
+    // Return null if no word is found
     return null;
   }
 
-  const rawDefinition = spawnSync("dict", [currentWord.text, "-d", "wn"], {
-    encoding: "utf-8",
-  })
-    .stdout.trim()
-    .split("\n");
+  // Remove any quotes from the extracted word
+  // const cleanedWord = removeQuotes(currentWord.text);
 
-  const value =
-    `${currentWord.text}\n${"-".repeat(currentWord.text.length)}\n\n` +
-    rawDefinition
-      .splice(5)
-      .map((line) => line.replace("      ", ""))
-      .map((line) => (line.startsWith(" ") ? line : "\n" + line))
-      .join("\n")
-      .trim();
+  // Retrieve the description from the workflowHoverDefinition
+  const definition = workflowHoverDefinition[currentWord.text]?.description;
+  const snippet = workflowHoverDefinition[currentWord.text]?.snippet;
+
+  if (!definition) {
+    // Return null if no definition is found
+    return null;
+  }
+
+  // Format the hover value with the word and its description
+  const value = formatHoverContent(currentWord.text, definition, snippet);
 
   return {
     contents: {
-      kind: "markdown",
-      value,
+      kind: 'markdown',
+      value
     },
-    range: currentWord.range,
+    range: currentWord.range
   };
 };
