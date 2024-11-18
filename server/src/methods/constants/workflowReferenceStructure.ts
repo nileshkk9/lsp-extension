@@ -213,5 +213,7 @@ export const workflowReferenceStructure: any = {
     outputVarMap: {},
     position: {},
     nodeType: 'PUBLISH'
-  }
+  },
+  workflowContext: {},
+  workflowNodes:[]
 };

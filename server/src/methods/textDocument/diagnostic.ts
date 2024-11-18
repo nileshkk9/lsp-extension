@@ -76,35 +76,24 @@ export const diagnostic = (
   }
 
   if (parsedContent && typeof parsedContent === 'object') {
-    Object.entries(parsedContent).forEach(([nodeKey, node]: any, index) => {
-      const nodeTypeKey = node.nodeType?.toLowerCase();
-      const template = workflowReferenceStructure[nodeTypeKey];
-
-      const nodeTypeLine = contentLines.findIndex((line) =>
-        line.includes(`"${nodeKey}"`)
-      );
-      const nodeTypeChar = contentLines[nodeTypeLine].indexOf(`"${nodeKey}"`);
-
-      if (!template) {
-        items.push({
-          source: 'LSP From Scratch',
-          severity: DiagnosticSeverity.Error,
-          range: {
-            start: { line: nodeTypeLine, character: nodeTypeChar },
-            end: {
-              line: nodeTypeLine,
-              character: nodeTypeChar + nodeKey.length + 1
-            }
-          },
-          message: `Unknown or incorrect nodeType: ${node.nodeType}`,
-          data: { keySuggestion: [], type: 'key-validation' }
-        });
-        return;
+    const workflowKeys: any = [];
+    for (const key in parsedContent) {
+      if (parsedContent[key]['nodeType']) {
+        workflowKeys.push(key);
       }
+    }
 
-      // Check for missing keys
-      Object.keys(template).forEach((key) => {
-        if (!(key in node)) {
+    Object.entries(parsedContent).forEach(([nodeKey, node]: any, index) => {
+      if (node && typeof node === 'object' && node.nodeType) {
+        const nodeTypeKey = node.nodeType?.toLowerCase();
+        const template = workflowReferenceStructure[nodeTypeKey];
+
+        const nodeTypeLine = contentLines.findIndex((line) =>
+          line.includes(`"${nodeKey}"`)
+        );
+        const nodeTypeChar = contentLines[nodeTypeLine].indexOf(`"${nodeKey}"`);
+
+        if (!template) {
           items.push({
             source: 'LSP From Scratch',
             severity: DiagnosticSeverity.Error,
@@ -115,36 +104,122 @@ export const diagnostic = (
                 character: nodeTypeChar + nodeKey.length + 1
               }
             },
-            message: `Missing key: ${key} in nodeType ${node.nodeType}`,
+            message: `Unknown or incorrect nodeType: ${node.nodeType}`,
             data: { keySuggestion: [], type: 'key-validation' }
           });
+          return;
         }
-      });
 
-      // Check for incorrect keys
-      Object.keys(node).forEach((key) => {
-        if (!(key in template)) {
-          const incorrectLine = contentLines.findIndex((line) =>
-            line.includes(`"${key}"`)
-          );
-          const incorrectChar = contentLines[incorrectLine].indexOf(`"${key}"`);
-          const suggestions = keySuggestions(key, Object.keys(template));
+        // Check for missing keys
+        Object.keys(template).forEach((key) => {
+          if (!(key in node)) {
+            items.push({
+              source: 'LSP From Scratch',
+              severity: DiagnosticSeverity.Error,
+              range: {
+                start: { line: nodeTypeLine, character: nodeTypeChar },
+                end: {
+                  line: nodeTypeLine,
+                  character: nodeTypeChar + nodeKey.length + 1
+                }
+              },
+              message: `Missing key: ${key} in nodeType ${node.nodeType}`,
+              data: { keySuggestion: [], type: 'key-validation' }
+            });
+          }
+        });
 
-          items.push({
-            source: 'LSP From Scratch',
-            severity: DiagnosticSeverity.Warning,
-            range: {
-              start: { line: incorrectLine, character: incorrectChar + 1 },
-              end: {
-                line: incorrectLine,
-                character: incorrectChar + key.length + 1
+        // Check for incorrect keys
+        Object.keys(node).forEach((key) => {
+          if (!(key in template)) {
+            const incorrectLine = contentLines.findIndex((line) =>
+              line.includes(`"${key}"`)
+            );
+            const incorrectChar = contentLines[incorrectLine].indexOf(
+              `"${key}"`
+            );
+            const suggestions = keySuggestions(key, Object.keys(template));
+
+            items.push({
+              source: 'LSP From Scratch',
+              severity: DiagnosticSeverity.Warning,
+              range: {
+                start: { line: incorrectLine, character: incorrectChar + 1 },
+                end: {
+                  line: incorrectLine,
+                  character: incorrectChar + key.length + 1
+                }
+              },
+              message: `Incorrect key: ${key} in nodeType ${node.nodeType}`,
+              data: { keySuggestion: suggestions, type: 'key-validation' }
+            });
+          }
+        });
+      } else {
+        // Generic object validation logic
+        const incorrectLine = contentLines.findIndex((line) =>
+          line.includes(`"${nodeKey}"`)
+        );
+        const incorrectChar = contentLines[incorrectLine].indexOf(
+          `"${nodeKey}"`
+        );
+        const suggestions = keySuggestions(
+          nodeKey,
+          Object.keys(workflowReferenceStructure)
+        );
+
+        if (typeof node === 'object') {
+          if (!(nodeKey in workflowReferenceStructure)) {
+            items.push({
+              source: 'LSP From Scratch',
+              severity: DiagnosticSeverity.Warning,
+              range: {
+                start: { line: incorrectLine, character: incorrectChar + 1 },
+                end: {
+                  line: incorrectLine,
+                  character: incorrectChar + nodeKey.length + 1
+                }
+              },
+              message: `Incorrect key: ${nodeKey}`,
+              data: { keySuggestion: suggestions, type: 'key-validation' }
+            });
+          } else if (Array.isArray(node) && !workflowKeys.includes(nodeKey)) {
+            // Diagnose if the key is not part of the workflowNodes array
+            const workflowNodes = parsedContent.workflowNodes || [];
+
+            Object.keys(parsedContent).forEach((key) => {
+              if (
+                parsedContent[key]?.nodeType &&
+                !workflowNodes.includes(key)
+              ) {
+                const incorrectLine = contentLines.findIndex((line) =>
+                  line.includes(`"${key}"`)
+                );
+                const incorrectChar = contentLines[incorrectLine].indexOf(
+                  `"${key}"`
+                );
+
+                items.push({
+                  source: 'LSP From Scratch',
+                  severity: DiagnosticSeverity.Error,
+                  range: {
+                    start: {
+                      line: incorrectLine,
+                      character: incorrectChar + 1
+                    },
+                    end: {
+                      line: incorrectLine,
+                      character: incorrectChar + key.length + 1
+                    }
+                  },
+                  message: `Key "${key}" with nodeType "${parsedContent[key].nodeType}" is not listed in "workflowNodes".`,
+                  data: { keySuggestion: [], type: 'key-validation' }
+                });
               }
-            },
-            message: `Incorrect key: ${key} in nodeType ${node.nodeType}`,
-            data: { keySuggestion: suggestions, type: 'key-validation' }
-          });
+            });
+          }
         }
-      });
+      }
     });
   }
 
@@ -153,5 +228,3 @@ export const diagnostic = (
     items
   };
 };
-
-
